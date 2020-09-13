@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 
@@ -27,10 +28,9 @@ namespace DynamicDataCollectionView
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
-            if(_reactiveCleanup != null)
-            {
-                return;
-            }
+
+            _reactiveCleanup?.Dispose();
+            _reactiveCleanup = null;
 
             _reactiveCleanup = new CompositeDisposable();
             SetupReactive();
@@ -43,9 +43,6 @@ namespace DynamicDataCollectionView
             {
                 return;
             }
-
-            _reactiveCleanup.Dispose();
-            _reactiveCleanup = null;
         }
 
         private void SetupReactive()
@@ -74,9 +71,20 @@ namespace DynamicDataCollectionView
 
             var flatView = new ListCollectionView(_flatList);
             flatView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(Person.Age)));
+            var dynamicView = new DynamicDataView(_groupList);
 
             FlatCollection.ItemsSource = flatView;
-            DynamicData.ItemsSource = new DynamicDataView(_groupList);
+            DynamicData.ItemsSource = dynamicView;
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5));
+
+                var defaultView = flatView;
+                var newView = dynamicView;
+
+                //Debugger.Break();
+            });
         }
 
         private IObservable<Person> CreatePeopleObservable()
