@@ -38,7 +38,7 @@ namespace DynamicDataCollectionView
             _groupsEditable = new ObservableCollection<object>();
             _groups = new ReadOnlyObservableCollection<object>(_groupsEditable);
             _indexers = new List<int>();
-            
+
             {
                 var properties = typeof(Person).GetProperties();
                 foreach (var property in properties)
@@ -55,7 +55,7 @@ namespace DynamicDataCollectionView
             }
 
             {
-                foreach(var group in _originalCollection)
+                foreach (var group in _originalCollection)
                 {
                     _groupsEditable.Add(group);
                 }
@@ -71,7 +71,7 @@ namespace DynamicDataCollectionView
                 _groupsEditable.Clear();
                 foreach (var group in copy)
                 {
-                    _groupsEditable.Add(group);
+                    _groupsEditable.Add(new CollectionViewGroupProxy(group, Dispatcher));
                 }
                 CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
             });
@@ -122,7 +122,7 @@ namespace DynamicDataCollectionView
 
         public IEnumerator GetEnumerator()
         {
-            foreach(var group in _originalCollection)
+            foreach (var group in _originalCollection)
             {
                 var copy = group.ToList();
                 yield return copy.AsEnumerable();
